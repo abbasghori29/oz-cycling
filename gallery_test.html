@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        .gallery-container {
+            overflow: hidden;
+            position: relative;
+        }
+
+        .gallery {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-slide {
+            flex: 0 0 100%;
+        }
+
+        .modal-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            z-index: 50;
+            max-width: 60px;
+        }
+
+        .modal-prev-btn {
+            left: 15%;
+        }
+
+        .modal-next-btn {
+            right: 15%;
+        }
+
+        .gallery img {
+            transition: transform 0.3s;
+        }
+
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            z-index: 10;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .prev-btn {
+            left: 1rem;
+        }
+
+        .next-btn {
+            right: 1rem;
+        }
+
+        .image-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        /* Large screens (4x2 grid = 8 images per slide) */
+        @media (min-width: 1024px) {
+            .image-grid {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+            }
+        }
+
+        /* Medium screens (3x2 grid = 6 images per slide) */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .image-grid {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+            }
+        }
+
+        /* Small screens (2x2 grid = 4 images per slide) */
+        @media (max-width: 767px) {
+            .image-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .modal-prev-btn { left: 5%; }
+            .modal-next-btn { right: 5%; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-6 text-white">Image Gallery</h1>
+        
+        <div class="gallery-container relative">
+            <button class="nav-btn prev-btn" onclick="prevSlide()">
+                <i class="fas fa-chevron-left text-3xl"></i>
+            </button>
+            
+            <div class="gallery" id="gallery">
+                <!-- Slides will be dynamically generated -->
+            </div>
+            
+            <button class="nav-btn next-btn" onclick="nextSlide()">
+                <i class="fas fa-chevron-right text-3xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal hidden fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center" id="myModal">
+        <span class="close-btn text-white text-4xl absolute top-4 right-8 cursor-pointer hover:text-gray-300" onclick="closeModal()">×</span>
+        <button class="modal-nav-btn modal-prev-btn" id="modalPrevBtn">
+            <i class="fas fa-chevron-left text-white text-3xl"></i>
+        </button>
+        <div class="modal-content max-w-4xl mx-auto px-4">
+            <img alt="Modal Image" class="max-h-[80vh] max-w-full h-auto mx-auto" id="modalImage" src=""/>
+        </div>
+        <button class="modal-nav-btn modal-next-btn" id="modalNextBtn">
+            <i class="fas fa-chevron-right text-white text-3xl"></i>
+        </button>
+    </div>
+
+    <script>
+        const imageUrls = [
+            'https://storage.googleapis.com/a1aa/image/bcgi3CdTxQ4GJpGG80iA0MgAY6hGzzRdIEiAJifFyG0wFK0JA.jpg',
+            'https://storage.googleapis.com/a1aa/image/mIUkEN55fCTbESAtsOagYzJaJHCIU1VX87Oge9pNG7knLUoTA.jpg',
+            'https://storage.googleapis.com/a1aa/image/fIPe4zgD0LqvuEY19eHIzI4vixHN2fWYjukgd1M3M4AntQhOB.jpg',
+            'https://storage.googleapis.com/a1aa/image/eAbmebeQzvCj1JfWUksqqQdbykhRI4ALMWOeWYPKBAiqchCdC.jpg',
+            'https://storage.googleapis.com/a1aa/image/Nu0EqPOp7xowFpctvdIRqwwgIlJBiEhw8gOYZytDNts1CF6E.jpg',
+            'https://storage.googleapis.com/a1aa/image/QsvsTa4jeGxmekcUuAjeZ6VAMYALwWe9fBVJoUq62GocahCdC.jpg',
+            'https://storage.googleapis.com/a1aa/image/AeKkM1IfZfJf1REh2XcpPGGHzDIKrqnRG4kfTGEv0Pb8ahCdC.jpg',
+            'https://storage.googleapis.com/a1aa/image/Ezj82R3nJw7MF5ah39UjZz9bE7WQTHGqKebqSjeXRDOkLUoTA.jpg',
+            'https://storage.googleapis.com/a1aa/image/A75r8xZ5EeReAkbQfqPIvlJKOaUlpXWSQ9cIszxCUNC1WoQnA.jpg',
+            'https://storage.googleapis.com/a1aa/image/fiTXRe0fxbABnJyH9zIV0EZrjzwh3SLfgJIHx2DtNbeubhCdC.jpg',
+            'https://storage.googleapis.com/a1aa/image/ZFQ7yUX9iArWFprqOfQtlNb13ZViTicfiYujqfOeX1FebhCdC.jpg',
+            'https://storage.googleapis.com/a1aa/image/iI4NFPudDD5BFppxBMICyCRMPJxVeFyRCZrjesHgq57cLUoTA.jpg',
+            'https://storage.googleapis.com/a1aa/image/poqeEdZZ8xRegkxxcizy2Yf3ynqGCFMsf4taRef5CmEE4CF6E.jpg',
+            'https://storage.googleapis.com/a1aa/image/Cf4nbV786fhVJkKGuePCxhADJmZOidLBBXBwcgP3wofXtQhOB.jpg',
+            'https://storage.googleapis.com/a1aa/image/KepsoiQflghLWU4ynbLx6hQ5IVYtlzQUCsiffaJcwpdOuQhOB.jpg'
+        ];
+
+        let currentSlide = 0;
+        let imagesPerSlide = 8; // Default for large screens
+
+        function updateImagesPerSlide() {
+            if (window.innerWidth >= 1024) {
+                imagesPerSlide = 8; // 4x2 grid
+            } else if (window.innerWidth >= 768) {
+                imagesPerSlide = 6; // 3x2 grid
+            } else {
+                imagesPerSlide = 4; // 2x2 grid
+            }
+            generateSlides();
+            updateGallery();
+        }
+
+        function generateSlides() {
+            const galleryElement = document.getElementById('gallery');
+            galleryElement.innerHTML = '';
+            
+            for (let i = 0; i < Math.ceil(imageUrls.length / imagesPerSlide); i++) {
+                const slide = document.createElement('div');
+                slide.className = 'gallery-slide';
+                
+                const grid = document.createElement('div');
+                grid.className = 'image-grid gap-4';
+                
+                const startIdx = i * imagesPerSlide;
+                const endIdx = Math.min(startIdx + imagesPerSlide, imageUrls.length);
+                
+                for (let j = startIdx; j < endIdx; j++) {
+                    const img = document.createElement('img');
+                    img.src = imageUrls[j];
+                    img.className = 'w-full h-64 object-cover rounded-lg cursor-pointer';
+                    img.onclick = () => openModal(imageUrls[j]);
+                    img.alt = `Image ${j + 1}`;
+                    grid.appendChild(img);
+                }
+                
+                slide.appendChild(grid);
+                galleryElement.appendChild(slide);
+            }
+        }
+
+        function updateGallery() {
+            const gallery = document.querySelector('.gallery');
+            gallery.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+
+        function nextSlide() {
+            const totalSlides = Math.ceil(imageUrls.length / imagesPerSlide);
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateGallery();
+        }
+
+        function prevSlide() {
+            const totalSlides = Math.ceil(imageUrls.length / imagesPerSlide);
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateGallery();
+        }
+
+        let currentImageIndex = 0;
+
+        function openModal(src) {
+            const modal = document.getElementById('myModal');
+            const modalImage = document.getElementById('modalImage');
+            modal.classList.remove('hidden');
+            modalImage.src = src;
+            currentImageIndex = imageUrls.indexOf(src);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('myModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function showNextImage() {
+            currentImageIndex = (currentImageIndex + 1) % imageUrls.length;
+            document.getElementById('modalImage').src = imageUrls[currentImageIndex];
+        }
+
+        function showPrevImage() {
+            currentImageIndex = (currentImageIndex - 1 + imageUrls.length) % imageUrls.length;
+            document.getElementById('modalImage').src = imageUrls[currentImageIndex];
+        }
+
+        document.getElementById('modalNextBtn').addEventListener('click', showNextImage);
+        document.getElementById('modalPrevBtn').addEventListener('click', showPrevImage);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+            if (e.key === 'ArrowRight') showNextImage();
+            if (e.key === 'ArrowLeft') showPrevImage();
+        });
+
+        document.getElementById('myModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('myModal')) closeModal();
+        });
+
+        // Initial setup and window resize handling
+        window.addEventListener('resize', updateImagesPerSlide);
+        updateImagesPerSlide();
+    </script>
+</body>
+</html>
