@@ -1,0 +1,66 @@
+.footer {
+    font-family: 'Raleway', sans-serif;
+}
+.review{
+    font-family: 'Roboto', sans-serif;
+}
+.modal {
+display: none;
+position: fixed;
+z-index: 50;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+overflow: auto;
+background-color: rgba(0, 0, 0, 0.8);
+}
+.modal-content {
+margin: 15% auto;
+padding: 20px;
+width: 80%;
+
+}
+.gallery img {
+height: 300px; /* adjust this value as needed */
+width: 400px;
+object-fit: cover; /* ensure the images are properly contained */
+}
+.hidden {
+display: none;
+}
+.active-tab {
+border-bottom: 4px solid #FFA500;
+}
+.fade-in {
+animation: fadeIn 0.5s ease-in-out;
+}
+@keyframes fadeIn {
+from {
+    opacity: 0;
+}
+to {
+    opacity: 1;
+}
+}
+
+@keyframes slideIn {
+from {
+    transform: translateY(20px);
+    opacity: 0;
+}
+to {
+    transform: translateY(0);
+    opacity: 1;
+}
+}
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+-ms-overflow-style: none;  /* IE and Edge */
+scrollbar-width: none;  /* Firefox */
+}

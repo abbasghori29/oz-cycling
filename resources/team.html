@@ -1,0 +1,171 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Meet Our Team</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        /* Card hover effect */
+        .team-card {
+            transition: transform 0.3s, background 0.3s;
+            width: 200px; /* Increase card width */
+        }
+        .team-card:hover {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            transform: scale(1.05);
+        }
+
+        /* Button sliding animation */
+        .slider-btn {
+            transition: transform 0.3s;
+        }
+        .slider-btn:hover {
+            transform: translateX(10px);
+        }
+        #prevBtn:hover {
+            transform: translateX(-10px);
+        }
+
+        /* Slide indicator styles */
+        .slide-indicator {
+            width: 20px;
+            height: 4px;
+            background-color: #ffffff; /* Default indicator color */
+            opacity: 0.5;
+            transition: opacity 0.3s, background-color 0.3s;
+        }
+        .active-indicator {
+            background-color: #ff7e5f; /* Active slide indicator color */
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-800">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-white mb-4">Meet Our Team</h1>
+        <p class="text-lg text-white mb-8">
+            Our expert team consists of creatives with technical know-how, strategists who think outside the box, and developers who push innovation.
+        </p>
+        <div class="flex items-center justify-center space-x-4">
+            <button id="prevBtn" class="bg-orange-600 p-2 rounded-lg shadow-lg text-white slider-btn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div id="teamContainer" class="flex justify-center space-x-6">
+                <!-- Team members will be dynamically inserted here -->
+            </div>
+            <button id="nextBtn" class="bg-orange-600 p-2 rounded-lg shadow-lg text-white slider-btn">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Slide indicators -->
+        <div id="slideIndicators" class="flex justify-center mt-4 space-x-2">
+            <!-- Indicators will be generated here -->
+        </div>
+    </div>
+
+    <script>
+        const teamMembers = [
+            { name: "Keven Feil", role: "PHP Developer", img: "static/images/elon.jpg" },
+            { name: "Stephanie R", role: "Web Developer", img: "static/images/elon.jpg" },
+            { name: "Kasey K", role: "UI-UX Designer", img: "static/images/elon.jpg" },
+            { name: "Astrid L", role: "Flutter Developer", img: "static/images/elon.jpg" },
+            { name: "Dani D", role: "Backend Developer", img: "static/images/elon.jpg" },
+            { name: "Jane Smith", role: "Frontend Developer", img: "static/images/elon.jpg" },
+            { name: "Alice Johnson", role: "Project Manager", img: "static/images/elon.jpg" },
+            { name: "Bob Brown", role: "DevOps Engineer", img: "static/images/elon.jpg" }
+        ];
+
+        let currentIndex = 0;
+        let itemsPerPage = getItemsPerPage();
+
+        function getItemsPerPage() {
+            if (window.innerWidth < 640) {
+                return 1;
+            } else if (window.innerWidth < 1024) {
+                return 2;
+            } else {
+                return 4;
+            }
+        }
+
+        function renderTeamMembers() {
+            const teamContainer = document.getElementById('teamContainer');
+            teamContainer.innerHTML = '';
+            const start = currentIndex * itemsPerPage;
+            const end = start + itemsPerPage;
+            const currentMembers = teamMembers.slice(start, end).length ? teamMembers.slice(start, end) : teamMembers.slice(0, itemsPerPage);
+
+            currentMembers.forEach(member => {
+                const memberDiv = document.createElement('div');
+                memberDiv.className = 'team-card bg-gray-800 p-6 rounded-lg shadow-lg text-center';
+                memberDiv.innerHTML = `
+                    <img alt="Portrait of ${member.name}" class="w-32 h-32 rounded-full mx-auto mb-4" src="${member.img}" width="150" height="150"/>
+                    <h2 class="text-xl font-bold text-white">${member.name}</h2>
+                    <p class="text-white mb-4">${member.role}</p>
+                    <div class="flex justify-center space-x-2">
+                        <a class="text-white" href="#"><i class="fab fa-twitter"></i></a>
+                        <a class="text-white" href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a class="text-white" href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                `;
+                teamContainer.appendChild(memberDiv);
+            });
+        }
+
+        function renderSlideIndicators() {
+            const slideIndicators = document.getElementById('slideIndicators');
+            slideIndicators.innerHTML = '';
+            const totalSlides = Math.ceil(teamMembers.length / itemsPerPage);
+
+            for (let i = 0; i < totalSlides; i++) {
+                const indicator = document.createElement('div');
+                indicator.className = 'slide-indicator rounded-full';
+                if (i === currentIndex) {
+                    indicator.classList.add('active-indicator');
+                }
+                slideIndicators.appendChild(indicator);
+            }
+        }
+
+        function updateSlide() {
+            renderTeamMembers();
+            renderSlideIndicators();
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) * itemsPerPage < teamMembers.length ? currentIndex + 1 : 0;
+            updateSlide();
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            currentIndex = currentIndex > 0 ? currentIndex - 1 : Math.ceil(teamMembers.length / itemsPerPage) - 1;
+            updateSlide();
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', nextSlide);
+
+        // Auto swipe every 10 sec
+        setInterval(nextSlide, 10000);
+
+        // Initial render
+        updateSlide();
+
+        // Adjust items per page on window resize
+        window.addEventListener('resize', () => {
+            const newItemsPerPage = getItemsPerPage();
+            if (newItemsPerPage !== itemsPerPage) {
+                itemsPerPage = newItemsPerPage;
+                currentIndex = 0;
+                updateSlide();
+            }
+        });
+    </script>
+</body>
+</html>
